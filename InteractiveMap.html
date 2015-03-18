@@ -1,0 +1,154 @@
+<html>
+<head>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <script>
+        var zipdata, dataHash, colors, sizes,
+                sizeBy, colorBy, threshold,
+                markerGroupsArray = [],
+                defaultSize = 1,
+                map;
+
+        var markerGroupsArray = [];
+
+        var displaydata = function (data) {
+            console.log(data)
+            if (data) {
+                var args = {};
+
+                if (data.data) {
+                    zipdata = data.data;
+                    //dataHash = data.dataHash[0];
+                    args.data = zipdata;
+                }
+
+                if (data.sizes) {
+                    sizes = data.sizes;
+                    args.sizes = sizes;
+                }
+
+                if (data.colors) {
+                    colors = data.colors;
+                    args.colors = colors;
+                }
+
+                colorBy = data.colorBy;
+                sizeBy = data.sizeBy
+
+                if (map) {
+                    addLeafletData(args);
+                }
+            }
+        };
+
+        var initializeLeaflet = function () {
+            map = L.map('map', {
+                center: [37.45, -93.85],
+                zoom: 5,
+                minZoom: 5,
+                maxBounds: [
+                    [15.961329, -129.92981],
+                    [52.908902, -56.80481]
+                ]
+            });
+
+            L.tileLayer("//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png", {
+                attribution: 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
+            }).addTo(map);
+
+            map.whenReady(function () {
+                if (zipdata !== undefined) {
+                    addLeafletData({
+                        data: zipdata,
+                        colors: colors,
+                        sizes: sizes
+                    });
+                }
+            })
+
+
+        };
+
+        var addLeafletData = function (args) {
+            var updatedData, updatedSizes, updatedColors;
+
+            // data has changed
+            if (args.data) {
+                updatedData = args.data;
+            }
+
+            // colors have changed
+            if (args.colors) {
+                updatedColors = args.colors;
+            }
+
+            // sizes have changed
+            if (args.sizes) {
+                updatedSizes = args.sizes;
+            }
+
+            if (updatedData && markerGroupsArray.length) {
+                for (var i = 0; i < markerGroupsArray.length; i++) {
+                    markerGroupsArray[i].clearLayers();
+                }
+                markerGroupsArray = [];
+            }
+
+            if (map) {
+                if (updatedData && updatedData.length) {
+                    // data is updated, redraw the entire map
+                    var markerArray = [],
+                            chunkSize = 1000;
+
+                    for (var i = 0; i < updatedData.length; i++) {
+                        if (!isNaN(updatedData[i].latitude) && !isNaN(updatedData[i].longitude)) {
+                            var circle = L.circle([zipdata[i].latitude, zipdata[i].longitude],
+                                    (updatedSizes[i] !== undefined && !isNaN(updatedSizes[i])) ? updatedSizes[i] : undefined,
+                                    {
+                                        stroke: false,
+                                        fill: true,
+                                        fillColor: (updatedColors[i]) ? updatedColors[i] : undefined,
+                                        fillOpacity: 0.4
+                                    });
+                            markerArray.push(circle);
+                        }
+
+                        // Adding points to the map in chunks so it feels more responsive
+                        if (i !== 0 && (i % chunkSize == 0 || i === zipdata.length - 1)) {
+                            var group = L.layerGroup(markerArray);
+                            map.addLayer(group);
+                            markerGroupsArray.push(group);
+                            markerArray = [];
+                        }
+                    }
+                } else {
+                    var index = 0;
+                    for(var i = 0; i < markerGroupsArray.length; i++){
+                        var layers = markerGroupsArray[i].getLayers();
+                        for(var j = 0; j < layers.length; j++){
+                            var style = {};
+                            if(updatedSizes && updatedSizes[index] !== undefined && !isNaN(updatedSizes[index])){
+                                layers[j].setRadius(updatedSizes[index]);
+                            }
+
+                            if(updatedColors && updatedColors[index]){
+                                style.fillColor = updatedColors[index];
+                                layers[j].setStyle(style)
+                            }
+
+
+                            index++;
+                        }
+                    }
+                }
+
+
+            }
+        };
+    </script>
+</head>
+<body onload="initializeLeaflet()" style="width: 100%; height: 100%; margin: 0; padding: 0;">
+<div id='map' style="width: 100%; height: 100%">
+</div>
+</body>
+</html>
