@@ -89,7 +89,7 @@ get.changed.viz.data <- (function(){
   data.hash <- NULL
   
   function(data, colors, sizes){
-    new.data.hash <- digest(colors)
+    new.data.hash <- digest(data)
     new.colors.hash <- digest(colors)
     new.sizes.hash <- digest(sizes)
     
@@ -101,6 +101,7 @@ get.changed.viz.data <- (function(){
     }
     
     result$data <- data
+    result$dataHash <- data.hash
     
     #return the colors if they have changed
     if(is.null(colors.hash) || new.colors.hash != colors.hash){
@@ -108,6 +109,7 @@ get.changed.viz.data <- (function(){
     }
     
     result$colors <- colors
+    result$colorsHash <- colors.hash
     
     #return the colors if they have changed
     if(is.null(sizes.hash) || new.sizes.hash != sizes.hash){
@@ -115,6 +117,7 @@ get.changed.viz.data <- (function(){
     }
     
     result$sizes <- sizes
+    result$sizesHash <- sizes.hash
     
     result
   }

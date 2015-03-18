@@ -3,7 +3,8 @@
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
     <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
     <script>
-        var zipdata, dataHash, colors, sizes,
+        var zipdata, colors, sizes,
+                dataHash, colorsHash, sizesHash,
                 sizeBy, colorBy, threshold,
                 markerGroupsArray = [],
                 defaultSize = 1,
@@ -18,18 +19,27 @@
 
                 if (data.data) {
                     zipdata = data.data;
-                    //dataHash = data.dataHash[0];
-                    args.data = zipdata;
+                    if(dataHash !== data.dataHash[0]){
+                        args.data = zipdata;
+                        dataHash = data.dataHash[0];
+                    }
+
                 }
 
                 if (data.sizes) {
                     sizes = data.sizes;
-                    args.sizes = sizes;
+                    if(sizesHash !== data.sizesHash[0]){
+                        args.sizes = sizes;
+                        sizesHash = data.sizesHash[0];
+                    }
                 }
 
                 if (data.colors) {
                     colors = data.colors;
-                    args.colors = colors;
+                    if(colorsHash !== data.colorsHash[0]){
+                        args.colors = colors;
+                        colorsHash = data.colorsHash[0];
+                    }
                 }
 
                 colorBy = data.colorBy;
